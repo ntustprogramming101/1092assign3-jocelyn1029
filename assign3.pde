@@ -261,48 +261,6 @@ void draw() {
       if (y<soilHeight){
         y=soilHeight;
       }
-/*
-      //down
-      if (down > 0) {
-      if (down == 1) {
-        groundhogIdleY = round(groundhogIdleY + step/frames);
-        image(groundhogIdle, groundhogIdleX, groundhogIdleY);
-      } else {
-        groundhogIdleY = groundhogIdleY + step/frames;
-        image(groundhogDown, groundhogIdleX, groundhogIdleY);
-      }
-      down -=1;
-    }
-
-    //left
-    if (left > 0) {
-      if (left == 1) {
-        groundhogIdleX = round(groundhogIdleX - step/frames);
-        image(groundhogIdle, groundhogIdleX, groundhogIdleY);
-      } else {
-        groundhogIdleX = groundhogIdleX - step/frames;
-        image(groundhogLeft, groundhogIdleX, groundhogIdleY);
-      }
-      left -=1;
-    }
-
-    //right
-    if (right > 0) {
-      if (right == 1) {
-        groundhogIdleX = round(groundhogIdleX + step/frames);
-        image(groundhogIdle, groundhogIdleX, groundhogIdleY);
-      } else {
-        groundhogIdleX = groundhogIdleX + step/frames;
-        image(groundhogRight, groundhogIdleX, groundhogIdleY);
-      }
-      right -=1;
-    }
-
-    //no move
-    if (down == 0 && left == 0 && right == 0 ) {
-      image(groundhogIdle, groundhogIdleX, groundhogIdleY);
-    }
-    */
 		break;
 
 		case GAME_OVER: // Gameover Screen
