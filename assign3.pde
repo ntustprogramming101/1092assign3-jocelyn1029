@@ -6,17 +6,12 @@ final int START_BUTTON_W = 144;
 final int START_BUTTON_H = 60;
 final int START_BUTTON_X = 248;
 final int START_BUTTON_Y = 360;
-final int count=8;
 
-//image
 PImage title, gameover, startNormal, startHovered, restartNormal, restartHovered;
-PImage bg, soil8x24;
-PImage [] imgsoil;int [] soilY ;int soilX;
-PImage life;
-PImage stone1, stone2;
-
+PImage bg, soil8x24,life,stone1,stone2;
+PImage [] imgsoil;int [] soilY ;int soilX;int grid=80;
 //groundhog declare
-PImage groundhogDown,groundhogIdle,groundhogLeft,groundhogRight;
+PImage groundhogDownImg,groundhogIdleImg,groundhogLeftImg,groundhogRightImg;
 int x,y;int groundhogW=80;
 int groundhogLestX, groundhogLestY;
 int groundhogMoveTime = 250;//move to next grid need 0.25s
@@ -24,15 +19,17 @@ int actionFrame; //groundhog's moving frame
 float lastTime; //time when the groundhog finished moving
 int stroll,strollLest;
 
-//soil
-int soilWidth = 80;
-int soilHeight = 80;
+float playerHealthX, playerHealthY;
+float playerHealth_Int = 2;
+float playerHealth_Start = 10;
+float playerHealth_Spacing = 20;
+int PLAYER_HEALTH_MAX = 5;
 
+boolean downPressed = false;
+boolean leftPressed = false;
+boolean rightPressed = false;
 //life declare
 int lifeX=10,lifeY=10,lifeW=51,lifeSpace=20;
-
-//boolean
-boolean upPressed = false, downPressed = false, leftPressed = false, rightPressed = false;
 
 // For debug function; DO NOT edit or remove this!
 int playerHealth = 0;
@@ -50,33 +47,36 @@ void setup() {
 	restartNormal = loadImage("img/restartNormal.png");
 	restartHovered = loadImage("img/restartHovered.png");
 	soil8x24 = loadImage("img/soil8x24.png");
-  life = loadImage("img/life.png");
-  groundhogIdle = loadImage("img/groundhogIdle.png");
-  groundhogDown = loadImage("img/groundhogDown.png");
-  groundhogLeft = loadImage("img/groundhogLeft.png");
-  groundhogRight = loadImage("img/groundhogRight.png");
-  stone1 = loadImage("img/stone1.png");
-  stone2 = loadImage("img/stone2.png");
-  
-  //groundhog
-  x=soilHeight*4;
-  y=soilHeight; 
-  frameRate(60);
-  lastTime = millis(); // save lastest time call the millis();
-  stroll=0;
-  
-  //
+  life=loadImage("img/life.png");
+  stone1=loadImage("img/stone1.png");
+  stone2=loadImage("img/stone2.png");
+  groundhogDownImg=loadImage("img/groundhogDown.png");
+  groundhogIdleImg=loadImage("img/groundhogIdle.png");
+  groundhogLeftImg=loadImage("img/groundhogLeft.png");
+  groundhogRightImg=loadImage("img/groundhogRight.png");
+  // soil setup
   imgsoil = new PImage[6];
   soilY = new int [4];
   for (int i=0; i<6; i++){
-  imgsoil[i] = loadImage("img/soil"+i+".png");
-}
+    imgsoil[i] = loadImage("img/soil"+i+".png");
+  }
+
+  //player health 
+playerHealth = int(playerHealth_Int);
+constrain(playerHealth,0 ,PLAYER_HEALTH_MAX);
+
+  //groundhog
+  x=grid*4;
+  y=grid; 
+  frameRate(60);
+  lastTime = millis(); // save lastest time call the millis();
+  stroll=0;
 }
 
 void draw() {
     /* ------ Debug Function ------ 
 
-      Please DO NOT edit the code here.
+      //Please DO NOT edit the code here.
       It's for reviewing other requirements when you fail to complete the camera moving requirement.
 
     */
@@ -89,12 +89,9 @@ void draw() {
     
 	switch (gameState) {
 
-		case GAME_START: 
-    // Start Screen
+		case GAME_START: // Start Screen
 		image(title, 0, 0);
-    
-    playerHealth=5;
-    
+
 		if(START_BUTTON_X + START_BUTTON_W > mouseX
 	    && START_BUTTON_X < mouseX
 	    && START_BUTTON_Y + START_BUTTON_H > mouseY
@@ -104,8 +101,10 @@ void draw() {
 			if(mousePressed){
 				gameState = GAME_RUN;
 				mousePressed = false;
-      }
+			}
+
 		}else{
+
 			image(startNormal, START_BUTTON_X, START_BUTTON_Y);
 
 		}
@@ -120,42 +119,42 @@ void draw() {
 	    stroke(255,255,0);
 	    strokeWeight(5);
 	    fill(253,184,19);
-	    ellipse(590,50,120,120);
+	    ellipse(590,50+stroll,120,120);
 
-     // Grass
-     fill(124, 204, 25);
-     noStroke();
-     rect(0, 160 - GRASS_HEIGHT, width, GRASS_HEIGHT);
-     
-    // Soil - REPLACE THIS PART WITH YOUR LOOP CODE!
-    image(soil8x24, 0, 160+stroll);
+		// Grass
+		fill(124, 204, 25);
+		noStroke();
+		rect(0, 160 - GRASS_HEIGHT+stroll, width, GRASS_HEIGHT);
+
+		// Soil - REPLACE THIS PART WITH YOUR LOOP CODE!
+		image(soil8x24, 0, 160+stroll);
     for (int i=0; i<6; i++){
       for (int k=0;k<8;k++){
-        soilX=soilHeight*k;
+        soilX=grid*k;
         for (int j=0; j<4; j++){
-          soilY[j]=i*4*soilHeight+j*soilHeight+2*soilHeight;
+          soilY[j]=i*4*grid+j*grid+2*grid;
           image(imgsoil[i],soilX,soilY[j]+stroll);
         }
       } 
     }
     // put stones on the soil
-        //layer 1-8
+    //layer 1-8
     for (int i=0;i<8;i++){
-      image(stone1,i*soilHeight,(i+2)*soilHeight+stroll,soilHeight,soilHeight);
+      image(stone1,i*grid,(i+2)*grid+stroll,grid,grid);
     }
     //layer 9-16
     for(int i=0;i<8;i++){
       if (i%4==1||i%4==2){
         for(int j=0;j<8;j++){
           if (j%4==0||j%4==3){
-            image(stone1,j*soilHeight,(i+10)*soilHeight+stroll,soilHeight,soilHeight);
+            image(stone1,j*grid,(i+10)*grid+stroll,grid,grid);
           }
         }
       }
       if (i%4==3||i%4==0){
         for(int j=0;j<8;j++){
           if (j%4==1||j%4==2){
-            image(stone1,j*soilHeight,(i+10)*soilHeight+stroll,soilHeight,soilHeight);
+            image(stone1,j*grid,(i+10)*grid+stroll,grid,grid);
           }
         }
       }
@@ -165,9 +164,9 @@ void draw() {
       if(i%3==0){
         for(int j=0;j<8;j++){
           if(j%3!=0){
-            image(stone1,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+            image(stone1,j*grid,(i+18)*grid+stroll,grid,grid);
             if(j%3==2){
-              image(stone2,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+              image(stone2,j*grid,(i+18)*grid+stroll,grid,grid);
             }
           }
         }
@@ -175,9 +174,9 @@ void draw() {
       if(i%3==1){
         for(int j=0;j<8;j++){
           if(j%3!=2){
-            image(stone1,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+            image(stone1,j*grid,(i+18)*grid+stroll,grid,grid);
             if(j%3==1){
-              image(stone2,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+              image(stone2,j*grid,(i+18)*grid+stroll,grid,grid);
             }
           }
         }
@@ -185,40 +184,41 @@ void draw() {
       if(i%3==2){
         for(int j=0;j<8;j++){
           if(j%3!=1){
-            image(stone1,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+            image(stone1,j*grid,(i+18)*grid+stroll,grid,grid);
             if(j%3==0){
-              image(stone2,j*soilHeight,(i+18)*soilHeight+stroll,soilHeight,soilHeight);
+              image(stone2,j*grid,(i+18)*grid+stroll,grid,grid);
             }
           }
         }
       }
     }
-     
-    //life
-    for(int i=0;i<playerHealth;i++){
-      imageMode(CORNER);
-      image(life,lifeX+(lifeW+lifeSpace)*i,lifeY);
+
+      for(int i = 0; i < playerHealth; i++){
+      playerHealthX = playerHealth_Start + i * (playerHealth_Spacing + life.width);
+      playerHealthY = playerHealth_Start;
+      image(life, playerHealthX, playerHealthY);
     }
-    
-        // Player
+ 
+
+		// Player
     //draw the groundhogDown image between 1-14 frames
       if (downPressed) {
-        if (stroll>-(20*soilHeight)){
+        if (stroll>-(20*grid)){
            actionFrame++; //in 1s actionFrame=60
           if (actionFrame > 0 && actionFrame <15) {
-            stroll -= soilHeight / 15.0;
-            image(groundhogDown,x,y);
+            stroll -= grid / 15.0;
+            image(groundhogDownImg,x,y);
           } else {
-            stroll = strollLest- soilHeight;
+            stroll = strollLest- grid;
             downPressed = false;
           }
         }else{
           actionFrame++; //in 1s actionFrame=60
           if (actionFrame > 0 && actionFrame <15) {
-            y += soilHeight / 15.0;
-            image(groundhogDown,x,y);
+            y += grid / 15.0;
+            image(groundhogDownImg,x,y);
           } else {
-            y = groundhogLestY + soilHeight;
+            y = groundhogLestY + grid;
             downPressed = false;
           }
         }
@@ -227,10 +227,10 @@ void draw() {
       if (leftPressed) {
         actionFrame++;
         if (actionFrame > 0 && actionFrame <15) {
-          x -= soilHeight / 15.0;
-         image(groundhogLeft,x,y);
+          x -= grid / 15.0;
+         image(groundhogLeftImg,x,y);
         } else {
-          x= groundhogLestX - soilHeight;
+          x= groundhogLestX - grid;
           leftPressed = false;
         }
       }
@@ -238,17 +238,16 @@ void draw() {
       if (rightPressed) {
         actionFrame++;
         if (actionFrame > 0 && actionFrame < 15) {
-          x += soilHeight / 15.0;
-          image(groundhogRight,x,y);
+          x += grid / 15.0;
+          image(groundhogRightImg,x,y);
         } else {
-          x = groundhogLestX + soilHeight;
+          x = groundhogLestX + grid;
           rightPressed = false;
         }
       }
       if(!downPressed&&!leftPressed&&!rightPressed){
-        image(groundhogIdle,x,y);
+        image(groundhogIdleImg,x,y);
       }
-      
       //boundary detection
       if (x>=width-groundhogW){
         x=width-groundhogW;
@@ -259,9 +258,10 @@ void draw() {
       if (y>height-groundhogW){
         y=height-groundhogW;
       }
-      if (y<soilHeight){
-        y=soilHeight;
+      if (y<grid){
+        y=grid;
       }
+
 		break;
 
 		case GAME_OVER: // Gameover Screen
@@ -291,11 +291,10 @@ void draw() {
     if (debugMode) {
         popMatrix();
     }
-    }
+}
 
 void keyPressed(){
-
-  // Add your moving input code here
+	// Add your moving input code here
   float newTime = millis(); //time when the groundhog started moving
   if (key == CODED) {
     switch (keyCode) {
@@ -326,7 +325,6 @@ void keyPressed(){
       break;
     }
   }
-  
 	// DO NOT REMOVE OR EDIT THE FOLLOWING SWITCH/CASES
     switch(key){
       case 'w':
